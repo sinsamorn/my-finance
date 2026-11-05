@@ -19,6 +19,10 @@
   --bg:#f3f6fb;--card:#fff;--shadow:0 2px 10px rgba(15,23,42,.08);--r:14px;
 }
 *{box-sizing:border-box}
+@font-face{font-family:"Kantumruy Pro";font-style:normal;font-weight:400;font-display:swap;src:url(fonts/kantumruy-400.woff2) format("woff2");unicode-range:U+1780-17FF,U+19E0-19FF,U+200C-200D,U+25CC}
+@font-face{font-family:"Kantumruy Pro";font-style:normal;font-weight:600;font-display:swap;src:url(fonts/kantumruy-600.woff2) format("woff2");unicode-range:U+1780-17FF,U+19E0-19FF,U+200C-200D,U+25CC}
+@font-face{font-family:"Kantumruy Pro";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/kantumruy-700.woff2) format("woff2");unicode-range:U+1780-17FF,U+19E0-19FF,U+200C-200D,U+25CC}
+html[lang=km] body,html[lang=km] button,html[lang=km] input,html[lang=km] select{font-family:"Kantumruy Pro","Noto Sans Khmer","Khmer OS",system-ui,sans-serif}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Khmer",sans-serif;-webkit-tap-highlight-color:transparent}
 button,input,select{font:inherit}
 header{background:linear-gradient(120deg,#0a3a9e,#1f6fe5 70%,#3b8cff);color:#fff;padding:calc(16px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) 18px calc(18px + env(safe-area-inset-left));display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -117,7 +121,7 @@ textarea{width:100%;min-height:120px;border:1px solid #cbd5e1;border-radius:10px
   <svg class="logo" viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 30 32 8l26 22"/><path d="M14 26v30h36V26"/><path d="M22 50V40M30 50V34M38 50V38"/><circle cx="50" cy="48" r="9" fill="#fbbf24" stroke="#fbbf24"/></svg>
   <div><h1>My Financial Dashboard</h1><p>Track • Manage • Plan</p></div>
   <div class="month"><button id="prevM" aria-label="Previous month">‹</button><span id="monthLbl"></span><button id="nextM" aria-label="Next month">›</button></div>
-  <div class="toolbar"><button id="installBtn" hidden>⬇️ Install</button><button id="acctBtn">👤 Sign in</button><button id="catsBtn">🏷️ Categories</button><button id="settingsBtn" aria-label="Data and backup">⚙️</button></div>
+  <div class="toolbar"><button id="installBtn" hidden>⬇️ Install</button><button id="langBtn" aria-label="Language">ខ្មែរ</button><button id="acctBtn">👤 Sign in</button><button id="catsBtn">🏷️ Categories</button><button id="settingsBtn" aria-label="Data and backup">⚙️</button></div>
 </header>
 
 <main>
@@ -234,6 +238,128 @@ textarea{width:100%;min-height:120px;border:1px solid #cbd5e1;border-radius:10px
 <script>
 (() => {
 'use strict';
+/* ---------- Khmer / English ---------- */
+const LANG_KEY = 'myfinance.lang';
+const KM_MONTHS = ['មករា','កុម្ភៈ','មីនា','មេសា','ឧសភា','មិថុនា','កក្កដា','សីហា','កញ្ញា','តុលា','វិច្ឆិកា','ធ្នូ'];
+const EN_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const KM = {
+  'My Financial Dashboard':'ផ្ទាំងហិរញ្ញវត្ថុរបស់ខ្ញុំ','Track • Manage • Plan':'តាមដាន • គ្រប់គ្រង • រៀបចំផែនការ',
+  '⬇️ Install':'⬇️ ដំឡើង','👤 Sign in':'👤 ចូលគណនី','🏷️ Categories':'🏷️ ប្រភេទ',
+  '⚠️ Sync':'⚠️ សមកាលកម្ម','⏳ Saving':'⏳ កំពុងរក្សាទុក','☁️ Synced':'☁️ បានរក្សាទុក',
+  "Today's Income":'ចំណូលថ្ងៃនេះ','Last Day Income':'ចំណូលថ្ងៃចុងក្រោយ','Weekly Income':'ចំណូលប្រចាំសប្តាហ៍','Monthly Income':'ចំណូលប្រចាំខែ','Remaining Balance':'សមតុល្យនៅសល់',
+  'vs. yesterday':'ធៀបនឹងម្សិលមិញ','last 7 days':'៧ ថ្ងៃចុងក្រោយ','vs. last month':'ធៀបនឹងខែមុន','All bank payments covered':'បានបង់ធនាគារគ្រប់ហើយ',
+  'Income Overview':'ទិដ្ឋភាពចំណូល','This Week':'សប្តាហ៍នេះ','This Month':'ខែនេះ','Last Month':'ខែមុន','Last 7 Days':'៧ ថ្ងៃចុងក្រោយ',
+  'Income by Source':'ចំណូលតាមប្រភព','This month ▾':'ខែនេះ ▾','Last 7 days ▾':'៧ ថ្ងៃចុងក្រោយ ▾','Today ▾':'ថ្ងៃនេះ ▾','Last day ▾':'ថ្ងៃចុងក្រោយ ▾',
+  'Today':'ថ្ងៃនេះ','7 days':'៧ ថ្ងៃ','No income recorded for this period.':'មិនមានចំណូលសម្រាប់រយៈពេលនេះទេ។',
+  'Monthly Bank Payments':'ការបង់ប្រាក់ធនាគារប្រចាំខែ','+ Bank':'+ ធនាគារ','Bank':'ធនាគារ','Amount':'ចំនួនទឹកប្រាក់','Due':'ថ្ងៃបង់','Status':'ស្ថានភាព',
+  'Tap a status to mark it Paid / unpaid.':'ចុចលើស្ថានភាព ដើម្បីកំណត់ថា បានបង់ / មិនទាន់បង់។',
+  '✔ Paid':'✔ បានបង់','🕒 Due':'🕒 ដល់ថ្ងៃបង់','⚠ Overdue':'⚠ ហួសកំណត់','• Pending':'• រង់ចាំ',
+  'Total Monthly Bank Payments':'សរុបការបង់ប្រាក់ធនាគារប្រចាំខែ','No bank payments yet. Tap “+ Bank”.':'មិនទាន់មានការបង់ប្រាក់ធនាគារទេ។ ចុច “+ ធនាគារ”។',
+  'Daily Family Expenses':'ចំណាយគ្រួសារប្រចាំថ្ងៃ','No expenses recorded for this day.':'មិនមានចំណាយសម្រាប់ថ្ងៃនេះទេ។',
+  'Monthly Expense Summary':'សង្ខេបចំណាយប្រចាំខែ','Family Expense':'ចំណាយគ្រួសារ','Bank Payments':'ការបង់ប្រាក់ធនាគារ','Others':'ផ្សេងៗ','Total Expenses':'ចំណាយសរុប',
+  'Monthly Summary':'សង្ខេបប្រចាំខែ','Total Income':'ចំណូលសរុប','Total Bank Payments':'ការបង់ប្រាក់ធនាគារសរុប','Total Family Expenses':'ចំណាយគ្រួសារសរុប','Other Expenses':'ចំណាយផ្សេងៗ','Monthly Balance':'សមតុល្យប្រចាំខែ',
+  'Recent Transactions':'ប្រតិបត្តិការថ្មីៗ','Date':'កាលបរិច្ឆេទ','Description':'ការពិពណ៌នា','Type':'ប្រភេទ',
+  'Income':'ចំណូល','Expense':'ចំណាយ','Payment':'ការបង់ប្រាក់','Bank pay':'បង់ធនាគារ','Banks':'ធនាគារ',
+  'No transactions this month. Tap + to add one.':'មិនមានប្រតិបត្តិការក្នុងខែនេះទេ។ ចុច + ដើម្បីបន្ថែម។',
+  'Add transaction':'បន្ថែមប្រតិបត្តិការ','Amount (USD)':'ចំនួនទឹកប្រាក់ (ដុល្លារ)','Category':'ប្រភេទ','Income source':'ប្រភពចំណូល',
+  'New source name, e.g. Rental income':'ឈ្មោះប្រភពថ្មី ឧ. ចំណូលពីការជួល','New category name, e.g. Pets':'ឈ្មោះប្រភេទថ្មី ឧ. សត្វចិញ្ចឹម',
+  '+ Add new source…':'+ បន្ថែមប្រភពថ្មី…','+ Add new category…':'+ បន្ថែមប្រភេទថ្មី…','Add a bank first':'សូមបន្ថែមធនាគារជាមុនសិន',
+  'e.g. Salary, Market, Tuk-tuk':'ឧ. ប្រាក់ខែ ផ្សារ តុកតុក','Edit, rename or delete categories':'កែ ប្តូរឈ្មោះ ឬលុបប្រភេទ',
+  'Cancel':'បោះបង់','Save':'រក្សាទុក','Categories':'ប្រភេទ','Add':'បន្ថែម','Done':'រួចរាល់','Close':'បិទ',
+  'Each bank is a monthly payment. Tap Edit to change the name, amount or due day.':'ធនាគារនីមួយៗជាការបង់ប្រាក់ប្រចាំខែ។ ចុច កែ ដើម្បីប្តូរឈ្មោះ ចំនួនទឹកប្រាក់ ឬថ្ងៃបង់។',
+  'Rename or recolor a source, or delete it. Entries from a deleted source move to another one.':'ប្តូរឈ្មោះ ឬពណ៌នៃប្រភព ឬលុបវា។ ប្រតិបត្តិការពីប្រភពដែលបានលុប នឹងផ្លាស់ទៅប្រភពផ្សេង។',
+  'Tick "Family" to count a category as a family expense; unticked ones count as Others.':'ធីក "គ្រួសារ" ដើម្បីរាប់ប្រភេទនោះជាចំណាយគ្រួសារ។ ប្រភេទដែលមិនធីក រាប់ជា ផ្សេងៗ។',
+  'New bank name':'ឈ្មោះធនាគារថ្មី','New income source':'ប្រភពចំណូលថ្មី','New expense category':'ប្រភេទចំណាយថ្មី','New category name':'ឈ្មោះប្រភេទថ្មី',
+  '✏️ Edit':'✏️ កែ','Family':'គ្រួសារ','No banks yet.':'មិនទាន់មានធនាគារទេ។','Delete?':'លុប?',
+  'Add monthly bank payment':'បន្ថែមការបង់ប្រាក់ធនាគារប្រចាំខែ','Edit bank payment':'កែការបង់ប្រាក់ធនាគារ','Bank name':'ឈ្មោះធនាគារ','e.g. ABA Bank':'ឧ. ធនាគារ ABA',
+  'Monthly amount (USD)':'ចំនួនប្រចាំខែ (ដុល្លារ)','Due day of month':'ថ្ងៃបង់ក្នុងខែ','Delete':'លុប','Tap again':'ចុចម្តងទៀត',
+  'Sign in to sync':'ចូលគណនី ដើម្បីរក្សាទុកអនឡាញ','Your account':'គណនីរបស់អ្នក','Set a new password':'កំណត់ពាក្យសម្ងាត់ថ្មី',
+  'Sign in to back up your data online and see it on all your devices. Without signing in, the app still works, with data saved only on this device.':'ចូលគណនី ដើម្បីបម្រុងទុកទិន្នន័យរបស់អ្នកតាមអនឡាញ និងមើលវានៅលើឧបករណ៍ទាំងអស់។ បើមិនចូលគណនីទេ កម្មវិធីនៅតែដំណើរការ ដោយរក្សាទុកទិន្នន័យតែលើឧបករណ៍នេះប៉ុណ្ណោះ។',
+  'Email':'អ៊ីមែល','Password':'ពាក្យសម្ងាត់','Sign in':'ចូលគណនី','Create account':'បង្កើតគណនី','Forgot password?':'ភ្លេចពាក្យសម្ងាត់?',
+  'New password':'ពាក្យសម្ងាត់ថ្មី','Save new password':'រក្សាទុកពាក្យសម្ងាត់ថ្មី','Signed in as':'បានចូលជា','Sync now':'ធ្វើសមកាលកម្មឥឡូវ','Sign out':'ចាកចេញ',
+  'Signing out removes the data from this device. It stays safe in your account.':'ការចាកចេញនឹងលុបទិន្នន័យចេញពីឧបករណ៍នេះ។ វានៅតែមានសុវត្ថិភាពក្នុងគណនីរបស់អ្នក។',
+  'Tap again to sign out':'ចុចម្តងទៀត ដើម្បីចាកចេញ','Please wait…':'សូមរង់ចាំ…','Type your email first.':'សូមវាយអ៊ីមែលរបស់អ្នកជាមុនសិន។',
+  'Account created. Check your email and tap the confirmation link, then come back and sign in.':'បានបង្កើតគណនី។ សូមពិនិត្យអ៊ីមែល ហើយចុចតំណបញ្ជាក់ រួចត្រឡប់មកចូលគណនីវិញ។',
+  'Online sync is not available right now. Check your internet connection.':'មិនអាចរក្សាទុកអនឡាញបានទេឥឡូវនេះ។ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត។',
+  'Check your email for a link to reset your password.':'សូមពិនិត្យអ៊ីមែល ដើម្បីទទួលតំណកំណត់ពាក្យសម្ងាត់ឡើងវិញ។','Password updated.':'បានប្តូរពាក្យសម្ងាត់ហើយ។',
+  'Invalid login credentials':'អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ','Email not confirmed':'អ៊ីមែលមិនទាន់បានបញ្ជាក់ទេ។ សូមចុចតំណក្នុងអ៊ីមែលរបស់អ្នក។','User already registered':'អ៊ីមែលនេះបានចុះឈ្មោះរួចហើយ',
+  '⏳ Saving…':'⏳ កំពុងរក្សាទុក…','⏳ Syncing…':'⏳ កំពុងធ្វើសមកាលកម្ម…','☁️ Up to date.':'☁️ ទិន្នន័យទាន់សម័យ។',
+  '☁️ All changes saved to your account.':'☁️ ការផ្លាស់ប្តូរទាំងអស់ត្រូវបានរក្សាទុកក្នុងគណនីរបស់អ្នក។',
+  '⚠️ Offline. Changes will upload when you are back online.':'⚠️ គ្មានអ៊ីនធឺណិត។ ការផ្លាស់ប្តូរនឹងផ្ទុកឡើង នៅពេលមានអ៊ីនធឺណិតវិញ។',
+  'Your data':'ទិន្នន័យរបស់អ្នក','Backup (JSON)':'ការបម្រុងទុក (JSON)','Copy backup':'ចម្លងការបម្រុងទុក','Restore from box':'ស្តារពីប្រអប់',
+  'Everything is saved only on this device. Copy a backup to keep it safe or move it to another phone.':'ទិន្នន័យរក្សាទុកនៅលើឧបករណ៍នេះ។ ចម្លងការបម្រុងទុក ដើម្បីរក្សាឱ្យមានសុវត្ថិភាព ឬផ្ទេរទៅទូរសព្ទផ្សេង។',
+  'Load sample data':'ផ្ទុកទិន្នន័យគំរូ','Erase all':'លុបទាំងអស់','Tap again to erase':'ចុចម្តងទៀត ដើម្បីលុប',
+  'Added':'បានបន្ថែម','All data erased':'បានលុបទិន្នន័យទាំងអស់','Backup copied':'បានចម្លងការបម្រុងទុក','Backup restored':'បានស្តារការបម្រុងទុក',
+  'Bank removed':'បានលុបធនាគារ','Bank saved':'បានរក្សាទុកធនាគារ','Deleted':'បានលុប','Keep at least one category':'ត្រូវទុកយ៉ាងហោចណាស់មួយប្រភេទ',
+  'Renamed':'បានប្តូរឈ្មោះ','Sample data loaded':'បានផ្ទុកទិន្នន័យគំរូ','Saved':'បានរក្សាទុក','Select the text and copy it':'សូមជ្រើសអត្ថបទ ហើយចម្លងវា',
+  'Signed in':'បានចូលគណនី','Signed out':'បានចាកចេញ','That backup text is not valid':'អត្ថបទបម្រុងទុកនេះមិនត្រឹមត្រូវទេ',
+  'That name already exists':'ឈ្មោះនេះមានរួចហើយ','Name cannot be empty':'ឈ្មោះមិនអាចទទេបានទេ',
+  'Salary':'ប្រាក់ខែ','Business':'អាជីវកម្ម','Freelance':'ការងារឯករាជ្យ','Gift':'អំណោយ','Other income':'ចំណូលផ្សេងៗ',
+  'Food':'ម្ហូបអាហារ','Shopping':'ទិញឥវ៉ាន់','Transport':'ការធ្វើដំណើរ','Household':'គ្រឿងប្រើប្រាស់ផ្ទះ','Health':'សុខភាព','Education':'ការសិក្សា','Utilities':'ទឹកភ្លើង',
+  'Bank payment':'បង់ប្រាក់ធនាគារ',
+  'Shop sales':'ការលក់ក្នុងហាង','Market':'ផ្សារ','Tuk-tuk':'តុកតុក','Cleaning':'សម្អាត','Misc':'ផ្សេងៗ','Groceries':'គ្រឿងទេស','Fuel':'សាំង','Rent share':'ថ្លៃផ្ទះ','Clothes':'សម្លៀកបំពាក់','School fees':'ថ្លៃសិក្សា','Phone repair':'ជួសជុលទូរសព្ទ','Salary bonus':'ប្រាក់រង្វាន់','Website job':'ការងារគេហទំព័រ','Design project':'គម្រោងរចនា'
+};
+const SHORT = 'Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec'.split('|');
+const kmMon = m => KM_MONTHS[SHORT.indexOf(m)];
+const KM_RULES = [
+  [/^(January|February|March|April|May|June|July|August|September|October|November|December) (\d{4})$/, (_, m, y) => `${KM_MONTHS[EN_MONTHS.indexOf(m)]} ${y}`],
+  [/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2})$/, (_, m, d) => `${d} ${kmMon(m)}`],
+  [/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/, (_, m) => kmMon(m)],
+  [/^Expenses on (\w{3}) (\d{1,2})$/, (_, m, d) => `ចំណាយនៅថ្ងៃទី ${d} ${kmMon(m)}`],
+  [/^(.+) bank payments still to pay$/, (_, a) => `នៅសល់ត្រូវបង់ធនាគារ ${a}`],
+  [/^Income · (.+)$/, (_, c) => `ចំណូល · ${tr(c)}`],
+  [/^(.+) payment$/, (_, b) => `បង់ ${b}`],
+  [/^(\d+) used$/, (_, n) => `ប្រើ ${n}`],
+  [/^(.+) · due day (\d+)$/, (_, a, d) => `${a} · ថ្ងៃបង់ទី ${d}`],
+  [/^(.+) marked unpaid$/, (_, b) => `${b} មិនទាន់បង់`],
+  [/^(.+) paid ✔$/, (_, b) => `${b} បានបង់ ✔`],
+  [/^Deleted\. (\d+) entr(?:y|ies) moved to (.+)$/, (_, n, c) => `បានលុប។ ប្រតិបត្តិការ ${n} ត្រូវបានផ្លាស់ទៅ ${tr(c)}`],
+  [/^⚠️ Could not save online: (.*)$/s, (_, e) => `⚠️ មិនអាចរក្សាទុកអនឡាញបានទេ៖ ${e}`],
+  [/^⚠️ Could not load from your account: (.*)$/s, (_, e) => `⚠️ មិនអាចទាញទិន្នន័យពីគណនីបានទេ៖ ${e}`]
+];
+let lang = (() => { try { const l = localStorage.getItem(LANG_KEY); if (l) return l; } catch(e) {} return (navigator.language || '').toLowerCase().startsWith('km') ? 'km' : 'en'; })();
+function tr(s){
+  if (lang !== 'km' || !s) return s;
+  const m = s.match(/^(\s*)([\s\S]*?)(\s*)$/), core = m[2];
+  if (!core) return s;
+  if (KM[core]) return m[1] + KM[core] + m[3];
+  for (const [re, fn] of KM_RULES) if (re.test(core)) return m[1] + core.replace(re, fn) + m[3];
+  return s;
+}
+const origText = new WeakMap(), origAttr = new WeakMap(), ATTRS = ['placeholder','aria-label'];
+let busy = false;
+function trNode(n){
+  if (n.nodeType === 3) {
+    const p = n.parentNode; if (!p || p.nodeName === 'SCRIPT' || p.nodeName === 'STYLE' || p.nodeName === 'TEXTAREA') return;
+    if (!origText.has(n)) origText.set(n, n.nodeValue);
+    const want = lang === 'km' ? tr(origText.get(n)) : origText.get(n);
+    if (n.nodeValue !== want) n.nodeValue = want;
+  } else if (n.nodeType === 1) {
+    for (const a of ATTRS) if (n.hasAttribute(a)) {
+      const o = origAttr.get(n) || {}; if (!(a in o)) { o[a] = n.getAttribute(a); origAttr.set(n, o); }
+      const want = lang === 'km' ? tr(o[a]) : o[a]; if (n.getAttribute(a) !== want) n.setAttribute(a, want);
+    }
+    if (n.nodeName === 'TEXTAREA' || n.nodeName === 'SCRIPT') return;
+    n.childNodes.forEach(trNode);
+  }
+}
+const obs = new MutationObserver(list => {
+  if (busy) return; busy = true;
+  for (const m of list) {
+    if (m.type === 'childList') m.addedNodes.forEach(trNode);
+    else if (m.type === 'characterData') { origText.set(m.target, m.target.nodeValue); trNode(m.target); }
+    else if (m.type === 'attributes') { const o = origAttr.get(m.target) || {}; o[m.attributeName] = m.target.getAttribute(m.attributeName); origAttr.set(m.target, o); trNode(m.target); }
+  }
+  obs.takeRecords(); busy = false;
+});
+function applyLang(){
+  document.documentElement.lang = lang;
+  document.title = lang === 'km' ? KM['My Financial Dashboard'] : 'My Financial Dashboard';
+  busy = true; trNode(document.body); obs.takeRecords(); busy = false;
+  const b = document.getElementById('langBtn'); if (b) b.textContent = lang === 'km' ? 'EN' : 'ខ្មែរ';
+}
+function setLang(l){ lang = l; try { localStorage.setItem(LANG_KEY, l); } catch(e) {} applyLang(); render(); }
+
 const KEY = 'myfinance.v1';
 const PALETTE = ['#16a34a','#1f6fe5','#6d4ee6','#f59e0b','#06b6d4','#ec4899','#84cc16','#f43f5e','#0ea5e9','#a855f7','#14b8a6','#eab308'];
 const DEF_INC = [['Salary','#16a34a'],['Business','#1f6fe5'],['Freelance','#6d4ee6'],['Gift','#f59e0b'],['Other income','#06b6d4']];
@@ -462,7 +588,7 @@ function setTxType(t){
   document.querySelectorAll('#txTabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
   $('#catWrap').hidden = t === 'payment'; $('#bankWrap').hidden = t !== 'payment';
   $('#catLbl').textContent = t === 'income' ? 'Income source' : 'Category';
-  $('#fCat').innerHTML = catList(t === 'income' ? 'income' : 'expense').map(c => `<option>${esc(c.name)}</option>`).join('') + `<option value="__new">+ Add new ${t === 'income' ? 'source' : 'category'}…</option>`;
+  $('#fCat').innerHTML = catList(t === 'income' ? 'income' : 'expense').map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('') + `<option value="__new">+ Add new ${t === 'income' ? 'source' : 'category'}…</option>`;
   $('#fNewCat').placeholder = t === 'income' ? 'New source name, e.g. Rental income' : 'New category name, e.g. Pets';
   $('#fNewCat').hidden = true; $('#fNewCat').required = false;
   $('#fBank').innerHTML = state.banks.map(b => `<option value="${b.id}">${esc(b.name)} — ${fmt(b.amount)}</option>`).join('') || '<option value="">Add a bank first</option>';
@@ -554,7 +680,7 @@ function renderCats(){
   }
   $('#catListEl').innerHTML = catList(catTab).map((c,i) => {
     const n = usage(catTab, c.name);
-    return `<li data-i="${i}"><input type="color" value="${c.color}" data-color aria-label="Color"><input class="nm" value="${esc(c.name)}" maxlength="30" data-name aria-label="Name">`
+    return `<li data-i="${i}"><input type="color" value="${c.color}" data-color aria-label="Color"><input class="nm" value="${esc(tr(c.name))}" maxlength="30" data-name aria-label="Name">`
       + (catTab === 'expense' ? `<label class="fam"><input type="checkbox" data-fam ${c.family?'checked':''}>Family</label>` : '')
       + `<span class="cnt">${n} used</span><button class="ib" data-cdel>🗑</button></li>`;
   }).join('');
@@ -723,7 +849,9 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
 }
 
-save(true); render();
+$('#langBtn').addEventListener('click', () => setLang(lang === 'km' ? 'en' : 'km'));
+obs.observe(document.body, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['placeholder','aria-label']});
+save(true); render(); applyLang();
 })();
 </script>
 </body>

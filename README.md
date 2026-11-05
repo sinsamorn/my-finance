@@ -10,6 +10,7 @@ A Progressive Web App (PWA) for tracking income, expenses and monthly bank payme
 | File | What it is |
 |---|---|
 | `index.html` | The whole app (layout, styles and code) |
+| `fonts/` | Kantumruy Pro Khmer font (SIL Open Font License), bundled for offline use |
 | `supabase.js` | Supabase client library (v2.119.0), bundled so it works offline |
 | `sw.js` | Service worker for offline use |
 | `manifest.json`, `icon-*.png` | App name and icons for "Install" / "Add to Home Screen" |
