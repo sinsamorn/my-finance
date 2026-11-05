@@ -1,5 +1,5 @@
 // Offline cache for My Financial Dashboard
-const CACHE = 'myfinance-v5';
+const CACHE = 'myfinance-v6';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './supabase.js', './fonts/kantumruy-400.woff2', './fonts/kantumruy-600.woff2', './fonts/kantumruy-700.woff2'];
 
 self.addEventListener('install', e => {

@@ -284,6 +284,7 @@ const KM = {
   'Online sync is not available right now. Check your internet connection.':'មិនអាចរក្សាទុកអនឡាញបានទេឥឡូវនេះ។ សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិត។',
   'Check your email for a link to reset your password.':'សូមពិនិត្យអ៊ីមែល ដើម្បីទទួលតំណកំណត់ពាក្យសម្ងាត់ឡើងវិញ។','Password updated.':'បានប្តូរពាក្យសម្ងាត់ហើយ។',
   'Invalid login credentials':'អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ','Email not confirmed':'អ៊ីមែលមិនទាន់បានបញ្ជាក់ទេ។ សូមចុចតំណក្នុងអ៊ីមែលរបស់អ្នក។','User already registered':'អ៊ីមែលនេះបានចុះឈ្មោះរួចហើយ',
+  'Too many emails were sent in the last hour. Please wait about an hour and try again, or sign in with an account you already created.':'បានផ្ញើអ៊ីមែលច្រើនពេកក្នុងរយៈពេលមួយម៉ោងចុងក្រោយ។ សូមរង់ចាំប្រហែលមួយម៉ោង ហើយព្យាយាមម្តងទៀត ឬចូលគណនីដែលអ្នកបានបង្កើតរួចហើយ។',
   '⏳ Saving…':'⏳ កំពុងរក្សាទុក…','⏳ Syncing…':'⏳ កំពុងធ្វើសមកាលកម្ម…','☁️ Up to date.':'☁️ ទិន្នន័យទាន់សម័យ។',
   '☁️ All changes saved to your account.':'☁️ ការផ្លាស់ប្តូរទាំងអស់ត្រូវបានរក្សាទុកក្នុងគណនីរបស់អ្នក។',
   '⚠️ Offline. Changes will upload when you are back online.':'⚠️ គ្មានអ៊ីនធឺណិត។ ការផ្លាស់ប្តូរនឹងផ្ទុកឡើង នៅពេលមានអ៊ីនធឺណិតវិញ។',
@@ -808,7 +809,7 @@ $('#acctForm').addEventListener('submit', async e => {
   const redirect = location.origin + location.pathname;
   const r = act === 'up' ? await sb.auth.signUp({ email, password, options: { emailRedirectTo: redirect } })
                          : await sb.auth.signInWithPassword({ email, password });
-  if (r.error) { $('#aMsg').textContent = r.error.message; return; }
+  if (r.error) { $('#aMsg').textContent = /rate limit/i.test(r.error.message) ? 'Too many emails were sent in the last hour. Please wait about an hour and try again, or sign in with an account you already created.' : r.error.message; return; }
   if (act === 'up' && !r.data.session) { $('#aMsg').style.color = '#15803d'; $('#aMsg').textContent = 'Account created. Check your email and tap the confirmation link, then come back and sign in.'; return; }
   closeAll(); toast('Signed in');
 });
