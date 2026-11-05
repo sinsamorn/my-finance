@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>My Financial Dashboard</title>
 <meta name="theme-color" content="#0b4fc4">
 <meta name="description" content="Track, manage and plan your income, bank payments and family expenses.">
@@ -23,6 +23,7 @@
 @font-face{font-family:"Kantumruy Pro";font-style:normal;font-weight:600;font-display:swap;src:url(fonts/kantumruy-600.woff2) format("woff2");unicode-range:U+1780-17FF,U+19E0-19FF,U+200C-200D,U+25CC}
 @font-face{font-family:"Kantumruy Pro";font-style:normal;font-weight:700;font-display:swap;src:url(fonts/kantumruy-700.woff2) format("woff2");unicode-range:U+1780-17FF,U+19E0-19FF,U+200C-200D,U+25CC}
 html[lang=km] body,html[lang=km] button,html[lang=km] input,html[lang=km] select{font-family:"Kantumruy Pro","Noto Sans Khmer","Khmer OS",system-ui,sans-serif}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Khmer",sans-serif;-webkit-tap-highlight-color:transparent}
 button,input,select{font:inherit}
 header{background:linear-gradient(120deg,#0a3a9e,#1f6fe5 70%,#3b8cff);color:#fff;padding:calc(16px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) 18px calc(18px + env(safe-area-inset-left));display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -98,12 +99,12 @@ label{display:block;font-size:13px;font-weight:600;color:#334155;margin:10px 0 4
 .btns button{flex:1;padding:12px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
 .btn-p{background:var(--blue);color:#fff}.btn-s{background:#eef2f7;color:#334155}.btn-d{background:#fee2e2;color:#b91c1c}
 .hint{font-size:12.5px;color:var(--muted);margin-top:6px}
-textarea{width:100%;min-height:120px;border:1px solid #cbd5e1;border-radius:10px;padding:10px;font:12px ui-monospace,monospace}
+textarea{width:100%;min-height:120px;border:1px solid #cbd5e1;border-radius:10px;padding:10px;font:16px ui-monospace,monospace}
 .catlist{list-style:none;margin:0;padding:0}
 .catlist li{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
 .catlist input[type=color]{width:34px;height:34px;padding:0;border:0;border-radius:50%;background:none;flex:none;cursor:pointer}
 .catlist input[type=color]::-webkit-color-swatch-wrapper{padding:0}.catlist input[type=color]::-webkit-color-swatch{border:0;border-radius:50%}
-.catlist .nm{flex:1;min-width:0;padding:8px 10px;border:1px solid #cbd5e1;border-radius:9px;font-size:15px}
+.catlist .nm{flex:1;min-width:0;padding:8px 10px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px}
 .catlist .cnt{font-size:12px;color:var(--muted);white-space:nowrap}
 .catlist .fam{font-size:12px;display:flex;align-items:center;gap:3px;color:#334155;white-space:nowrap;margin:0;font-weight:500}
 .catlist .ib{border:0;background:#eef2f7;border-radius:9px;padding:8px 10px;cursor:pointer;font-size:14px;white-space:nowrap}
@@ -849,6 +850,8 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
 }
 
+['gesturestart','gesturechange'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), {passive:false}));
+document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, {passive:false});
 $('#langBtn').addEventListener('click', () => setLang(lang === 'km' ? 'en' : 'km'));
 obs.observe(document.body, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:['placeholder','aria-label']});
 save(true); render(); applyLang();
